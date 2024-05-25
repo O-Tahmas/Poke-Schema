@@ -1,34 +1,24 @@
-"""
-DOCS HERE ON SETTING UP PostgreSQL Database
-"""
 import requests
-import psycopg2
-import json
+from local_db import connect_db
 
-def connect_db():
-    conn = psycopg2.connect(
-        dbname="pokemon_db",
-        user="postgres", # default values, change as per your local config
-        password="admin", # default values, change as per your local config
-        host="localhost"
-    )
-    return conn
 
 def fetch_pokemon_types():
     url = "https://pokeapi.co/api/v2/type/"
-    response = requests.get(url)
-    types_data = response.json()
-    return types_data['results']
+    types = []
+    while url:
+        response = requests.get(url)
+        data = response.json()
+        types.extend(data['results'])
+        url = data['next']  # Get the next URL, if available
+    return types
 
 # Get type data from the API result
 def get_type_data(type_api_result):
     response = requests.get(type_api_result['url'])
     response_json = response.json()
-
     type_id = response_json['id']
     name = response_json['name']
     generation = response_json['generation']['url'].split('/')[-2]
-
     damage_relations = []
     for relation, related_types in response_json['damage_relations'].items():
         multiplier = {
@@ -39,11 +29,9 @@ def get_type_data(type_api_result):
             "half_damage_from": 0.5,
             "double_damage_from": 2.0
         }[relation]
-
         for related_type in related_types:
             related_type_id = int(related_type['url'].split('/')[-2])
             damage_relations.append((type_id, related_type_id, multiplier))
-
     return [type_id, name, generation, damage_relations]
 
 # Insert type data into the database
@@ -70,27 +58,23 @@ def insert_damage_relations(conn, damage_relations):
     conn.commit()
     cur.close()
 
+
 def main():
-    # Connect to the database
+    # Connect to local db
     conn = connect_db()
 
     # Fetch and insert types and relations
     pokemon_types = fetch_pokemon_types()
     type_entries = []
-    for type_api_result in pokemon_types:
-        type_entries.append( get_type_data(type_api_result) )
+    type_entries = [get_type_data(type_api_result) for type_api_result in pokemon_types]
     
     # Need to loop through twice, so that PostGres allows for foriegn insertions properly
     for entry in type_entries:
         type_id, name, generation = entry[0], entry[1], entry[2]
         insert_type_data(conn, type_id, name, generation)
-    
     for entry in type_entries:
         damage_relations = entry[3]
         insert_damage_relations(conn,damage_relations)
 
-    # Close the database connection
+    # Close local db connection
     conn.close()
-
-if __name__ == "__main__":
-    main()
