@@ -96,6 +96,31 @@ def insert_pokemon_base_stats(conn, pokemon_id, stats):
     conn.commit()
     cur.close()
 
+## Some entries have flawed generational information, so must be manually adjusted! 
+def update_pokemon_generations(conn):
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE pokemon
+        SET generation_id = 8
+        WHERE pokemon_id BETWEEN 10158 AND 10246;
+    """)
+
+    cur.execute("""
+        UPDATE pokemon
+        SET generation_id = 7
+        WHERE pokemon_id BETWEEN 10091 AND 10157;
+    """)
+
+    cur.execute("""
+        UPDATE pokemon
+        SET generation_id = 6
+        WHERE pokemon_id BETWEEN 10025 AND 10090;
+    """)
+
+    conn.commit()
+    cur.close()
+
 
 def main():
 
@@ -117,11 +142,12 @@ def main():
             conn, pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id
         )
         insert_pokemon_base_stats(conn, pokemon_id, stats)
+    
+    # To cover for the flawed generational data
+    update_pokemon_generations(conn)
 
     # Close connection
     conn.close()
-
-
 
 if __name__ == "__main__":
     main()
