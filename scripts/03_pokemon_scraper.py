@@ -1,8 +1,28 @@
 import requests
-from utilities import connect_db, fetch_all
+from utilities import connect_db, fetch_all, scrape_generations
 
+def get_version_group_mapping():
+    version_groups_url = "https://pokeapi.co/api/v2/version-group/"
+    version_groups = fetch_all(version_groups_url)
+    version_to_generation = {}
+    for version_group in version_groups:
+        version_data = requests.get(version_group['url']).json()
+        generation_id = int(version_data['generation']['url'].split('/')[-2])
+        for version in version_data['versions']:
+            version_id = int(version['url'].split('/')[-2])
+            version_to_generation[version_id] = generation_id
+    return version_to_generation
 
-def get_pokemon_data(pokemon_api_result):
+def get_pokemon_data(pokemon_api_result, version_to_generation , generation_matrix):
+    
+    # Helper function to map a pkmn to a generation based on dex (or id)
+    # for those that don't have game indicies
+    def get_generation_id_matrix(pokemon_id, generation_matrix):
+        for i in range(len(generation_matrix) - 1):
+            if generation_matrix[i][1] <= pokemon_id < generation_matrix[i + 1][1]:
+                return generation_matrix[i][0]
+        return generation_matrix[-1][0]  # If it's the last generation
+    
     response = requests.get(pokemon_api_result["url"])
     response_json = response.json()
     pokemon_id = response_json["id"]
@@ -16,6 +36,11 @@ def get_pokemon_data(pokemon_api_result):
     ]
     type1_id = types[0]
     type2_id = types[1] if len(types) > 1 else None
+    try:
+        game_index = response_json['game_indices'][0]['version']['url'].split('/')[-2]
+        generation_id = version_to_generation[int(game_index)]
+    except IndexError:
+        generation_id = get_generation_id_matrix(pokemon_id, generation_matrix)
     stats = [
         (
             int(stat_info["stat"]["url"].split("/")[-2]),
@@ -24,20 +49,19 @@ def get_pokemon_data(pokemon_api_result):
         )
         for stat_info in response_json["stats"]
     ]
-    return pokemon_id, name, type1_id, type2_id, height, mass, base_experience, stats
-
+    return pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id, stats
 
 def insert_pokemon_data(
-    conn, pokemon_id, name, type1_id, type2_id, height, mass, base_experience
+    conn, pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id
 ):
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT INTO pokemon (pokemon_id, pokemon_name, type1_id, type2_id, height, mass, base_experience)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO pokemon (pokemon_id, pokemon_name, type1_id, type2_id, height, mass, base_experience, generation_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (pokemon_id) DO NOTHING
     """,
-        (pokemon_id, name, type1_id, type2_id, height, mass, base_experience),
+        (pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id),
     )
     conn.commit()
     cur.close()
@@ -78,15 +102,19 @@ def main():
     # Connect to local db
     conn = connect_db()
 
+    # Fetch genarational data
+    generation_matrix = scrape_generations()
+    version_to_generation = get_version_group_mapping()
+
     # Fetch pokemon data and split into pokemon table and stat table
     pokemon_url = "https://pokeapi.co/api/v2/pokemon/"
     all_pokemon = fetch_all(pokemon_url)
     for pokemon_api_result in all_pokemon:
-        pokemon_id, name, type1_id, type2_id, height, mass, base_experience, stats = (
-            get_pokemon_data(pokemon_api_result)
+        pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id, stats = (
+            get_pokemon_data(pokemon_api_result, version_to_generation, generation_matrix)
         )
         insert_pokemon_data(
-            conn, pokemon_id, name, type1_id, type2_id, height, mass, base_experience
+            conn, pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id
         )
         insert_pokemon_base_stats(conn, pokemon_id, stats)
 
@@ -94,5 +122,7 @@ def main():
     conn.close()
 
 
+
 if __name__ == "__main__":
     main()
+
