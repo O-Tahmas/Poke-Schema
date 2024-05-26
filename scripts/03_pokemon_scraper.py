@@ -51,6 +51,7 @@ def get_pokemon_data(pokemon_api_result, version_to_generation , generation_matr
     ]
     return pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id, stats
 
+
 def insert_pokemon_data(
     conn, pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id
 ):
@@ -66,25 +67,28 @@ def insert_pokemon_data(
     conn.commit()
     cur.close()
 
-
-def insert_base_stat(conn, stat_id, stat_name):
+def insert_base_stats(base_stat_result, conn):
     cur = conn.cursor()
-    cur.execute(
-        """
+    for base_stat_entry in base_stat_result:
+        stat_id = base_stat_entry['url'].split('/')[-2]
+        print(stat_id,base_stat_entry['name'])
+        cur.execute(
+            """
         INSERT INTO base_stats (stat_id, stat_name)
         VALUES (%s, %s)
         ON CONFLICT (stat_id) DO NOTHING
-    """,
-        (stat_id, stat_name),
-    )
+
+        """,
+            (stat_id, base_stat_entry['name'])
+        )
     conn.commit()
     cur.close()
-
+        
 
 def insert_pokemon_base_stats(conn, pokemon_id, stats):
     cur = conn.cursor()
     for stat_id, stat_value, stat_name in stats:
-        insert_base_stat(conn, stat_id, stat_name)
+        # insert_base_stat(conn, stat_id, stat_name)
         cur.execute(
             """
             INSERT INTO pokemon_base_stats (pokemon_id, stat_id, stat_value)
@@ -141,11 +145,18 @@ def main():
         insert_pokemon_data(
             conn, pokemon_id, name, type1_id, type2_id, height, mass, base_experience, generation_id
         )
-        insert_pokemon_base_stats(conn, pokemon_id, stats)
+        # insert_pokemon_base_stats(conn, pokemon_id, stats)
     
     # To cover for the flawed generational data
     update_pokemon_generations(conn)
 
+    # Insert base stats
+    base_stats_url = 'https://pokeapi.co/api/v2/stat/'
+    base_stats = fetch_all(base_stats_url)
+    print(len(base_stats))
+    insert_base_stats(base_stats, conn)
+
+    
     # Close connection
     conn.close()
 

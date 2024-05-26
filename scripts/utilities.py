@@ -12,7 +12,7 @@ def connect_db():
     )
     return conn
 
-
+# Stop trying to make `fetch` happen, it's not going to happen!
 def fetch_all(url):
     data_out = []
     while url:
