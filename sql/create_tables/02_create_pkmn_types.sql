@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS pkmn_types;
 DROP TABLE IF EXISTS type_relations;
+DROP TABLE IF EXISTS pkmn_types;
 
 
 CREATE TABLE pkmn_types (

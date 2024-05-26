@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS pokemon;
-DROP TABLE IF EXISTS base_stats;
 DROP TABLE IF EXISTS pokemon_base_stats;
+DROP TABLE IF EXISTS base_stats;
+DROP TABLE IF EXISTS pokemon;
 
 CREATE TABLE pokemon(
     pokemon_id INT PRIMARY KEY,
@@ -10,8 +10,10 @@ CREATE TABLE pokemon(
     height INT,
     mass INT,
     base_experience INT,
+    generation_id INT,
     FOREIGN KEY (type1_id) REFERENCES pkmn_types(type_id),
-    FOREIGN KEY (type2_id) REFERENCES pkmn_types(type_id)
+    FOREIGN KEY (type2_id) REFERENCES pkmn_types(type_id),
+    FOREIGN KEY (generation_id) REFERENCES generations(generation_id)
 );
 
 CREATE TABLE base_stats(
