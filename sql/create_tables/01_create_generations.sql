@@ -12,6 +12,8 @@ CREATE TABLE generations (
 CREATE TABLE regions (
     region_id INT PRIMARY KEY,
     region_name VARCHAR(32) NOT NULL UNIQUE
+    generation_id INT,
+    FOREIGN KEY (generation_id) REFERENCES generations(generation_id)
 );
 
 CREATE TABLE locations (

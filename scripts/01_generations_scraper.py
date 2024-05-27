@@ -29,18 +29,22 @@ def get_region_data(region_api_result):
     response_json = response.json()
     region_id = response_json["id"]
     region_name = response_json["name"]
-    return region_id, region_name
+    if not response_json["main_generation"] and region_id == 9:
+        generation_id = 8 #  hisui is not accounted for on pokeapi
+    else:
+        generation_id = int(response_json["main_generation"]["url"].split("/")[-2])
+    return region_id, region_name, generation_id
 
 
-def insert_region_data(conn, region_id, region_name):
+def insert_region_data(conn, region_id, region_name, gen_id):
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT INTO regions (region_id, region_name)
-        VALUES (%s, %s)
+        INSERT INTO regions (region_id, region_name, generation_id)
+        VALUES (%s, %s, %s)
         ON CONFLICT (region_id) DO NOTHING
     """,
-        (region_id, region_name),
+        (region_id, region_name, gen_id),
     )
     conn.commit()
     cur.close()
@@ -176,8 +180,8 @@ def main():
     regions_url = "https://pokeapi.co/api/v2/region/"
     regions = fetch_all(regions_url)
     for region_api_result in regions:
-        region_id, region_name = get_region_data(region_api_result)
-        insert_region_data(conn, region_id, region_name)
+        region_id, region_name, gen_id = get_region_data(region_api_result)
+        insert_region_data(conn, region_id, region_name, gen_id)
 
     # Populate Locations
     locations_url = "https://pokeapi.co/api/v2/location/"
