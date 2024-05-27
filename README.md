@@ -75,6 +75,19 @@ Run the Python scripts to scrape data from online and populate the database. You
 python scripts/run_all.py
 ```
 
+### Data Sourcing
+
+The primary source of data for this project is from [PokeAPI](https://github.com/PokeAPI/pokeapi). They provide a fantastic RESTful API for accessing much more data than is compiled here.
+
+### Additional Notes
+
+- **Modular SQL Files:** The SQL code is stored in `sql` directory in modular format, these are executed in sequence by the `master_setup.sql` script.
+
+- **Python Scripts:** The Python scripts predominantly scrape data from PokeAPI and populate the PostgreSQL database. Each script focuses on a specific part of the data (e.g., generations, types, Pokemon). 
+
+- **Configuration:** The database connection parameters are configurable via the `config.yaml` file.
+
+
 ### License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
