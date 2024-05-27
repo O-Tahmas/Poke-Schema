@@ -20,6 +20,7 @@ def fetch_all(url):
         data = response.json()
         data_out.extend(data["results"])
         url = data["next"]
+        # break # helpful when wanting to test an initial sample
     return data_out
 
 # bs4 scraper to pull mappings of national dex #'s to generations

@@ -1,18 +1,6 @@
 import requests
 from utilities import connect_db, fetch_all
 
-
-def fetch_pokemon_types_():
-    url = "https://pokeapi.co/api/v2/type/"
-    types = []
-    while url:
-        response = requests.get(url)
-        data = response.json()
-        types.extend(data["results"])
-        url = data["next"]  # Get the next URL, if available
-    return types
-
-
 # Get type data from the API result
 def get_type_data(type_api_result):
     response = requests.get(type_api_result["url"])
