@@ -64,7 +64,7 @@ database:
 Execute the SQL scripts to create the necessary database schema. This should be done before running the Python scripts, as the Python scripts depend on the database schema.
 
 ```sh
-psql -U yourusername -d pokemon_db -f sql/master_setup.sql
+psql -U yourusername -d pokemon_db -f sql/create_schema.sql
 ```
 
 ### 7. Run Python Scripts
