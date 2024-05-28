@@ -88,6 +88,11 @@ The primary source of data for this project is from [PokeAPI](https://github.com
 - **Configuration:** The database connection parameters are configurable via the `config.yaml` file.
 
 
+### Schema Diagram
+
+![Schema Diagram](schema.png)
+
+
 ### License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
