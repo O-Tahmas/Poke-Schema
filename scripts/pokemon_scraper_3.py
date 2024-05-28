@@ -71,7 +71,6 @@ def insert_base_stats(base_stat_result, conn):
     cur = conn.cursor()
     for base_stat_entry in base_stat_result:
         stat_id = base_stat_entry['url'].split('/')[-2]
-        print(stat_id,base_stat_entry['name'])
         cur.execute(
             """
         INSERT INTO base_stats (stat_id, stat_name)
@@ -153,7 +152,6 @@ def main():
     # Insert base stats
     base_stats_url = 'https://pokeapi.co/api/v2/stat/'
     base_stats = fetch_all(base_stats_url)
-    print(len(base_stats))
     insert_base_stats(base_stats, conn)
 
     
