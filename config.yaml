@@ -1,5 +1,5 @@
 database:
-  dbname: "pokemon_db_test"
+  dbname: "pokemon_db"
   user: "postgres"
   password: "admin"
   host: "localhost"
