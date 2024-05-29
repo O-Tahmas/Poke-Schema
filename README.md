@@ -2,7 +2,8 @@
 
 ## Overview
 
-This project scrapes and stores Pokemon data in a PostgreSQL database. It includes data on generations, types, Pokemon, moves, and evolutions. The data is sourced from the PokeAPI and stored in a relational database for easy querying and analysis.
+This project is designed to scrape and store comprehensive Pokémon data in a PostgreSQL database. The data encompasses information on generations, types, individual Pokémon, moves, and evolutions. Data is stored in a relational database structured to at least the Boyce-Codd Normal Form (BCNF) level. This ensures optimal data integrity and querying efficiency, making the database robust and highly reliable for various applications.
+
 
 ## Prerequisites
 
@@ -102,4 +103,4 @@ The primary source of data for this project is from [PokeAPI](https://github.com
 
 ### License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details
