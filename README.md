@@ -59,7 +59,14 @@ database:
   port: 5432
 ```
 
-### 6. Run SQL Scripts
+### 6. Running Tests
+To ensure everything is set up correctly and working, run the tests using `pytest`. This will verify the configuration, database connection, and data population processes.
+
+```sh
+pytest
+```
+
+### 7. Run SQL Scripts
 
 Execute the SQL scripts to create the necessary database schema. This should be done before running the Python scripts, as the Python scripts depend on the database schema.
 
@@ -67,7 +74,7 @@ Execute the SQL scripts to create the necessary database schema. This should be 
 psql -U yourusername -d pokemon_db -f sql/create_schema.sql
 ```
 
-### 7. Run Python Scripts
+### 8. Run Python Scripts
 
 Run the Python scripts to scrape data from online and populate the database. You can run them all in sequence using the provided `run_all.py` script.
 
